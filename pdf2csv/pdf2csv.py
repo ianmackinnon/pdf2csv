@@ -62,7 +62,7 @@ DEBUG_SPLITS = False
 
 
 
-def lines_to_tables(lines, border_width=None, debug_svg=None):
+def geo_to_tables(group_list, border_width=None, debug_svg=None):
     def line_to_bbox(line):
         if isinstance(line["x"], collections.abc.Iterable):
             return {
@@ -92,21 +92,13 @@ def lines_to_tables(lines, border_width=None, debug_svg=None):
 
     def bbox_combine(bbox1, bbox2):
         def segment_combine(segment1, segment2):
-            return [
-                min(segment1 + segment2),
-                max(segment1 + segment2),
-            ]
+            points = list(segment1) + list(segment2)
+            return [min(points), max(points)]
 
         return {
             "x": segment_combine(bbox1["x"], bbox2["x"]),
             "y": segment_combine(bbox1["y"], bbox2["y"]),
         }
-
-
-    group_list = [{
-        "bbox": line_to_bbox(line),
-        "lines": [line],
-    } for line in lines["x"] + lines["y"]]
 
     i = 0
     LOG.debug("Combining groups...")
@@ -200,26 +192,33 @@ def scrape_page_data(
     layout = device.get_result()
 
     page_chars = []
-    page_lines_x = []
-    page_lines_y = []
+    page_groups = []
 
     for element in layout:
         if isinstance(element, LTRect):
-            page_lines_x.append({
-                "x": (element.x0, element.x1),
-                "y": element.y0,
-            })
-            page_lines_x.append({
-                "x": (element.x0, element.x1),
-                "y": element.y1,
-            })
-            page_lines_y.append({
-                "x": element.x0,
-                "y": (element.y0, element.y1),
-            })
-            page_lines_y.append({
-                "x": element.x1,
-                "y": (element.y0, element.y1),
+            page_groups.append({
+                "bbox": {
+                    "x": (element.x0, element.x1),
+                    "y": (element.y0, element.y1),
+                },
+                "lines": [
+                    {
+                        "x": (element.x0, element.x1),
+                        "y": element.y0,
+                    },
+                    {
+                        "x": (element.x0, element.x1),
+                        "y": element.y1,
+                    },
+                    {
+                        "x": element.x0,
+                        "y": (element.y0, element.y1),
+                    },
+                    {
+                        "x": element.x1,
+                        "y": (element.y0, element.y1),
+                    }
+                ]
             })
         elif isinstance(element, LTLine):
             LOG.warning("Line extraction not implemented yet")
@@ -247,13 +246,8 @@ def scrape_page_data(
         else:
             LOG.warning("unknown element: %s", str(element))
 
-    lines = {
-        "x": page_lines_x,
-        "y": page_lines_y,
-    }
-
-    tables = lines_to_tables(
-        lines,
+    tables = geo_to_tables(
+        page_groups,
         border_width=border_width,
         debug_svg=debug_svg
     )
