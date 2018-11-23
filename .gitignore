@@ -1,2 +1,6 @@
 .~*#
 __pycache__
+build
+dist
+pdf2csv.egg-info
+
