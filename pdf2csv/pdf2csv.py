@@ -39,7 +39,7 @@ from pdfminer.layout import LAParams, \
     LTRect, LTLine
 from pdfminer.converter import PDFPageAggregator
 
-from util import color_log, dump_svg
+from .util import color_log, dump_svg
 
 
 
@@ -409,8 +409,8 @@ def table_to_rows(
 
 
 
-def pdf_to_csv(
-        pdf_path, out,
+def pdf_to_csv_tables(
+        pdf_path,
         page_first=None, page_last=None,
         border_width=None,
         debug_dump_svg_path=None,
@@ -418,7 +418,6 @@ def pdf_to_csv(
     LOG.info("%s: Searching for pages...", pdf_path)
 
     breadcrumbs = (pdf_path, )
-    written = False
 
     with open(pdf_path, "rb") as fp:
         for p, page in enumerate(PDFPage.get_pages(fp), 1):
@@ -462,15 +461,22 @@ def pdf_to_csv(
                     breadcrumbs=page_breadcrumbs,
                     debug_svg=debug_svg
                 )
-                if table_rows:
-                    if written:
-                        out.write("\n")
-                    writer = csv.writer(out)
-                    writer.writerows(table_rows)
-                    written = True
+                yield table_rows
 
             if debug_svg:
                 dump_svg(**debug_svg)
+
+
+
+def pdf_to_csv_stream(pdf_path, out, **kwargs):
+    written = False
+    for row in pdf_to_csv_rows(pdf_path, **kwargs):
+        if table_rows:
+            if written:
+                out.write("\n")
+            writer = csv.writer(out)
+            writer.writerows(table_rows)
+            written = True
 
 
 

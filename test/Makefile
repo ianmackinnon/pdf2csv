@@ -1,7 +1,10 @@
 SHELL := /bin/bash
 
+all :
+	./test_pdf2csv.py
 
-all : eu-20th-204 eu-20th-333 eu-20th-1020
+
+eu : eu-20th-204 eu-20th-333 eu-20th-1020
 
 OPTIONS := -vv
 
