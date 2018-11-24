@@ -5,18 +5,23 @@ NAME := pdf2csv
 
 all :
 
-clean : clean-packages clean-python-cache
+clean : clean-packages clean-tests clean-python-cache
 
 test :
 	python3 setup.py test
+
+tox :
+	tox
 
 
 build-packages :
 	python3 setup.py sdist bdist_wheel
 
 clean-packages :
-	rm -rf build dist $(NAME).egg-info
+	rm -rf .eggs build dist $(NAME).egg-info
 
+clean-tests :
+	rm -rf .pytest_cache .tox
 
 clean-python-cache :
 	find . -name __pycache__ -exec rm -rf {} +

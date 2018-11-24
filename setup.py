@@ -23,7 +23,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
     ],
-    install_requires=['pdfminer.six'],
+    install_requires=['chardet', 'pdfminer.six'],
     python_requires='>=3',
     scripts=["scripts/pdf2csv"],
     setup_requires=["pytest-runner"],
