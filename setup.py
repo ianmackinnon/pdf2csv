@@ -26,4 +26,6 @@ setuptools.setup(
     install_requires=['pdfminer.six'],
     python_requires='>=3',
     scripts=["scripts/pdf2csv"],
+    setup_requires=["pytest-runner"],
+    tests_requires=["pytest"],
 )

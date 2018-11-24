@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import csv
 import sys
 import logging
@@ -15,6 +16,8 @@ from pdf2csv import pdf_to_csv_tables
 
 LOG = logging.getLogger("test_pdf2csv")
 
+TEST_PATH = os.path.abspath(os.path.dirname(__file__))
+
 
 
 class TestApi(unittest.TestCase):
@@ -24,8 +27,8 @@ class TestApi(unittest.TestCase):
         cls.longMessage = True
 
     def compare_known_result(self, name):
-        pdf_path = "cases/{name}.pdf".format(name=name)
-        csv_known_path = "cases/{name}.csv".format(name=name)
+        pdf_path = os.path.join(TEST_PATH, "cases/{name}.pdf".format(name=name))
+        csv_known_path = os.path.join(TEST_PATH, "cases/{name}.csv".format(name=name))
 
         with open(csv_known_path) as fp:
             reader = csv.reader(fp)
@@ -66,8 +69,8 @@ class TestCli(unittest.TestCase):
         cls.longMessage = True
 
     def compare_known_result(self, name):
-        pdf_path = "cases/{name}.pdf".format(name=name)
-        csv_known_path = "cases/{name}.csv".format(name=name)
+        pdf_path = os.path.join(TEST_PATH, "cases/{name}.pdf".format(name=name))
+        csv_known_path = os.path.join(TEST_PATH, "cases/{name}.csv".format(name=name))
         csv_test_path = "/tmp/{name}.csv".format(name=name)
 
         border_width = 1.5

@@ -1,6 +1,7 @@
 .~*#
-__pycache__
-build
-dist
-pdf2csv.egg-info
+__pycache__/
+/build/
+/dist/
+/.eggs/
+/pdf2csv.egg-info/
 

@@ -5,11 +5,10 @@ NAME := pdf2csv
 
 all :
 
-clean : clean-packages
-
+clean : clean-packages clean-python-cache
 
 test :
-	$(MAKE) -C test all
+	python3 setup.py test
 
 
 build-packages :
@@ -17,6 +16,10 @@ build-packages :
 
 clean-packages :
 	rm -rf build dist $(NAME).egg-info
+
+
+clean-python-cache :
+	find . -name __pycache__ -exec rm -rf {} +
 
 
 install-global-editable :
