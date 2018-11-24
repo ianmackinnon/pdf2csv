@@ -5,6 +5,7 @@ import sys
 import logging
 import argparse
 import unittest
+from subprocess import Popen, PIPE
 
 sys.path.append("../")
 
@@ -16,17 +17,11 @@ LOG = logging.getLogger("test_pdf2csv")
 
 
 
-class TestClass(unittest.TestCase):
+class TestApi(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.longMessage = True
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
 
     def compare_known_result(self, name):
         pdf_path = "cases/{name}.pdf".format(name=name)
@@ -49,6 +44,58 @@ class TestClass(unittest.TestCase):
 
         self.assertEqual(len(known_rows), len(test_rows))
         self.assertEqual(known_rows, test_rows)
+
+    def test_eu_20th_204(self):
+        name = "eu-20th-204"
+        self.compare_known_result(name)
+
+    def test_eu_20th_333(self):
+        name = "eu-20th-333"
+        self.compare_known_result(name)
+
+    def test_eu_20th_1020(self):
+        name = "eu-20th-1020"
+        self.compare_known_result(name)
+
+
+
+class TestCli(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.longMessage = True
+
+    def compare_known_result(self, name):
+        pdf_path = "cases/{name}.pdf".format(name=name)
+        csv_known_path = "cases/{name}.csv".format(name=name)
+        csv_test_path = "/tmp/{name}.csv".format(name=name)
+
+        border_width = 1.5
+
+        cmd = [
+            "pdf2csv",
+            "--border-width", str(border_width),
+            "-o", csv_test_path,
+            pdf_path,
+        ]
+        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        (out, err) = process.communicate()
+        status = process.returncode
+        self.assertFalse(out)
+        self.assertFalse(err)
+        self.assertFalse(status)
+
+        cmd = [
+            "diff", "-q",
+            csv_known_path,
+            csv_test_path,
+        ]
+        process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+        (out, err) = process.communicate()
+        status = process.returncode
+        self.assertFalse(out)
+        self.assertFalse(err)
+        self.assertFalse(status)
 
     def test_eu_20th_204(self):
         name = "eu-20th-204"

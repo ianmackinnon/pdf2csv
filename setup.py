@@ -25,4 +25,5 @@ setuptools.setup(
     ],
     install_requires=['pdfminer.six'],
     python_requires='>=3',
+    scripts=["scripts/pdf2csv"],
 )

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -22,10 +20,8 @@ Extract tabular data from PDF files by detecting table border lines.
 import re
 import csv
 import sys
-import shutil
 import logging
 import argparse
-import tempfile
 import collections
 
 from pdfminer.pdfparser import PDFParser
@@ -39,7 +35,7 @@ from pdfminer.layout import LAParams, \
     LTRect, LTLine
 from pdfminer.converter import PDFPageAggregator
 
-from .util import color_log, dump_svg
+from .util import dump_svg
 
 
 
@@ -47,9 +43,10 @@ LOG = logging.getLogger('pdf2csv')
 
 
 
+DEFAULT_BORDER_WIDTH = 1
+
 MAX_SPLIT_ITERATIONS = 1e5
 MAX_GROUP_ITERATIONS = 1e7
-DEFAULT_BORDER_WIDTH = 1
 SVG_CONTENT_OPTIONS = (
     "char",
     "geo",
@@ -470,120 +467,10 @@ def pdf_to_csv_tables(
 
 def pdf_to_csv_stream(pdf_path, out, **kwargs):
     written = False
-    for row in pdf_to_csv_rows(pdf_path, **kwargs):
+    for table_rows in pdf_to_csv_tables(pdf_path, **kwargs):
         if table_rows:
             if written:
                 out.write("\n")
             writer = csv.writer(out)
             writer.writerows(table_rows)
             written = True
-
-
-
-def parse_page_range(text):
-    """
-    Parse a string representation of a page range and return Integer
-    values for first and last page, either or both of which may be `None`.
-    """
-
-    if not text:
-        return (None, None)
-
-    text = text.strip()
-
-    if not text:
-        return (None, None)
-
-    try:
-        page = int(text)
-    except ValueError:
-        pass
-    else:
-        return (page, page)
-
-    (first, last) = text.split("-")
-
-    first = int(first)
-    last = int(last)
-
-    return (first, last)
-
-
-
-def main():
-    LOG.addHandler(logging.StreamHandler())
-    log_util = logging.getLogger('util')
-    for log in LOG, log_util:
-        color_log(log)
-
-    parser = argparse.ArgumentParser(
-        description="Scrape tabular data from PDF tables.")
-
-    parser.add_argument(
-        "--verbose", "-v",
-        action="count", default=0,
-        help="Print verbose information for debugging.")
-    parser.add_argument(
-        "--quiet", "-q",
-        action="count", default=0,
-        help="Suppress warnings.")
-
-    parser.add_argument(
-        "--page-range", "-p",
-        action="store",
-        help="Page range, starting from 1. Eg.: `2-9`.")
-    parser.add_argument(
-        "--border-width", "-b",
-        action="store",
-        type=float, default=DEFAULT_BORDER_WIDTH,
-        help="Width of table borders in page units.")
-
-    parser.add_argument(
-        "--debug-dump-svg-path",
-        action="store",
-        help=(
-            "Path to SVG output file for debug purposes. "
-            "Include %d to insert page numbers."
-        ))
-
-    parser.add_argument(
-        "--outfile", "-o",
-        action="store",
-        help="Path to CSV output file.")
-
-    parser.add_argument(
-        "pdf",
-        metavar="PDF",
-        help="Path to PDF input file.")
-
-    args = parser.parse_args()
-
-    level = (logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG)[
-        max(0, min(3, 1 + args.verbose - args.quiet))]
-    for log in LOG, log_util:
-        log.setLevel(level)
-
-    (page_first, page_last) = parse_page_range(args.page_range)
-
-    def f(out):
-        pdf_to_csv(
-            args.pdf, out,
-            page_first=page_first, page_last=page_last,
-            border_width=args.border_width,
-            debug_dump_svg_path=args.debug_dump_svg_path
-        )
-
-    if args.outfile:
-        with tempfile.NamedTemporaryFile(
-            delete=False, mode="w+", encoding="utf-8"
-        ) as temp:
-            f(temp)
-            temp.close()
-            shutil.move(temp.name, args.outfile)
-    else:
-        f(sys.stdout)
-
-
-
-if __name__ == '__main__':
-    main()
