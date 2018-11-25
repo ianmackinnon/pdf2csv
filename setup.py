@@ -27,5 +27,5 @@ setuptools.setup(
     python_requires='>=3',
     scripts=["scripts/pdf2csv"],
     setup_requires=["pytest-runner"],
-    tests_requires=["pytest"],
+    tests_requires=["pytest", "tox", "coverage", "pytest-cov"],
 )

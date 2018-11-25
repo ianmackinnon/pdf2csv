@@ -1,9 +1,12 @@
 .~*#
 __pycache__/
+
 /build/
 /dist/
 /.eggs/
 /pdf2csv.egg-info/
+
 /.pytest_cache/
 /.tox/
+/.coverage
 

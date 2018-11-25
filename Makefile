@@ -10,6 +10,13 @@ clean : clean-packages clean-tests clean-python-cache
 test :
 	python3 setup.py test
 
+coverage :
+	pytest tests --cov
+	coverage html -d /tmp/pdf2csv-coverage-html
+
+coverage-view :
+	xdg-open /tmp/pdf2csv-coverage-html/index.html
+
 tox :
 	tox
 
