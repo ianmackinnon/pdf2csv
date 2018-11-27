@@ -1,5 +1,4 @@
 SHELL := /bin/bash
-.PHONY : test
 
 NAME := pdf2csv
 
@@ -12,10 +11,10 @@ test :
 
 coverage :
 	pytest tests --cov
-	coverage html -d /tmp/pdf2csv-coverage-html
+	coverage html -d /tmp/$(NAME)-coverage-html
 
 coverage-view :
-	xdg-open /tmp/pdf2csv-coverage-html/index.html
+	xdg-open /tmp/$(NAME)-coverage-html/index.html
 
 tox :
 	tox
@@ -41,4 +40,5 @@ uninstall-global :
 	cd / && sudo -H python3 -m pip uninstall -y $(NAME)
 
 installed-version-global :
-	python3 -c "import pdf2csv; print(pdf2csv.__version__)"
+	python3 -c "import $(NAME); print($(NAME).__version__)"
+
